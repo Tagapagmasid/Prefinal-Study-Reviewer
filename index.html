@@ -1,0 +1,907 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#243b82">
+  <title>Prefinal Study Reviewer</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f6f8fc;
+      --surface: #ffffff;
+      --surface-soft: #eef2ff;
+      --text: #15213b;
+      --muted: #52617b;
+      --border: #d8deeb;
+      --brand: #243b82;
+      --brand-hover: #1c2f69;
+      --green: #176b3a;
+      --green-bg: #eaf7ef;
+      --red: #a52c35;
+      --red-bg: #fff0f0;
+      --note-bg: #fff8e6;
+      --note-border: #e6cc7d;
+      --radius: 12px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--page); color: var(--text); line-height: 1.55; }
+    button { font: inherit; }
+    a { color: #244ca6; text-underline-offset: 3px; overflow-wrap: anywhere; }
+    a:hover { color: var(--brand-hover); }
+    :focus-visible { outline: 3px solid #d79516; outline-offset: 3px; }
+    .site-header { background: var(--surface); border-bottom: 1px solid var(--border); }
+    .header-inner { width: min(100% - 32px, 1040px); min-height: 64px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { color: var(--brand); font-weight: 750; letter-spacing: .01em; text-decoration: none; }
+    .nav-controls { display: flex; gap: 8px; }
+    .nav-controls[hidden] { display: none; }
+    main { width: min(100% - 32px, 1040px); margin: 28px auto 72px; }
+    .screen[hidden] { display: none; }
+    .page-heading { margin: 0 0 8px; font-size: clamp(1.55rem, 3.4vw, 2.15rem); line-height: 1.2; letter-spacing: -.025em; }
+    .lead { margin: 0 0 24px; color: var(--muted); max-width: 66ch; }
+    .eyebrow { margin: 0 0 8px; color: var(--brand); font-size: .82rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+    .subject-grid, .mode-grid, .handout-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 14px; }
+    .subject-card, .mode-card, .handout-card, .term-card, .question-card, .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+    .subject-card, .mode-card, .handout-card { width: 100%; text-align: left; color: var(--text); cursor: pointer; transition: border-color .15s ease, background-color .15s ease; }
+    .subject-card { min-height: 132px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; }
+    .subject-card:hover, .mode-card:hover, .handout-card:hover { border-color: #8296cf; background: #fbfcff; }
+    .subject-name { display: block; font-weight: 750; font-size: 1.12rem; }
+    .subject-code, .small-label { color: var(--muted); font-size: .9rem; }
+    .card-arrow { color: var(--brand); font-weight: 700; }
+    .mode-card { min-height: 120px; padding: 19px; }
+    .mode-title { display: block; font-weight: 750; font-size: 1.1rem; margin-bottom: 5px; }
+    .handout-card { min-height: 92px; padding: 17px; }
+    .handout-card strong { display: block; margin-bottom: 5px; }
+    .button { min-height: 46px; padding: 9px 15px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); color: var(--text); cursor: pointer; }
+    .button:hover { border-color: #8296cf; background: #f8faff; }
+    .button-primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .button-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+    .content-toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .pill { display: inline-flex; align-items: center; min-height: 30px; padding: 4px 10px; border-radius: 999px; background: var(--surface-soft); color: var(--brand); font-size: .84rem; font-weight: 700; }
+    .terms-list { display: grid; gap: 12px; }
+    .term-card { padding: 18px; }
+    .term-card h3 { margin: 0 0 10px; font-size: 1.08rem; }
+    .term-source { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .term-meta { margin: 10px 0 0; color: var(--muted); font-size: .88rem; }
+    .elaboration { margin: 12px 0 0; padding: 12px 14px; border-left: 3px solid #8296cf; background: #f6f8ff; border-radius: 0 8px 8px 0; }
+    .elaboration strong, .source-label { color: var(--brand); }
+    .section-title { margin: 26px 0 12px; font-size: 1.2rem; }
+    .note-box { padding: 14px 16px; background: var(--note-bg); border: 1px solid var(--note-border); border-radius: 10px; }
+    .note-box p { margin: 0; }
+    .test-toolbar { position: sticky; top: 0; z-index: 2; margin: 0 0 16px; padding: 12px; background: rgba(246,248,252,.96); backdrop-filter: blur(6px); border-bottom: 1px solid var(--border); }
+    .score-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    .score-text { font-weight: 700; }
+    .progress-track { height: 7px; margin-top: 10px; overflow: hidden; border-radius: 999px; background: #e0e5ef; }
+    .progress-fill { height: 100%; width: 0; background: var(--brand); transition: width .18s ease; }
+    .question-list { display: grid; gap: 14px; }
+    .question-card { padding: 18px; scroll-margin-top: 122px; }
+    .question-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+    .question-number { flex: 0 0 auto; min-width: 38px; min-height: 32px; display: inline-flex; justify-content: center; align-items: center; padding: 3px 8px; border-radius: 8px; background: var(--surface-soft); color: var(--brand); font-weight: 750; }
+    .question-text { margin: 0; font-weight: 650; overflow-wrap: anywhere; }
+    .question-note { margin: 0 0 12px; padding: 11px 13px; border-left: 3px solid #d79516; background: var(--note-bg); border-radius: 0 8px 8px 0; font-size: .95rem; }
+    .option-list { display: grid; gap: 8px; }
+    .option-button { min-height: 48px; width: 100%; display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; text-align: left; background: #fff; border: 1px solid var(--border); border-radius: 9px; color: var(--text); cursor: pointer; }
+    .option-button:hover:not(:disabled) { border-color: #8296cf; background: #fbfcff; }
+    .option-button:disabled { cursor: default; opacity: 1; }
+    .option-label { flex: 0 0 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; background: #f0f2f7; color: #34415e; font-weight: 750; }
+    .option-copy { overflow-wrap: anywhere; }
+    .option-button.is-correct { border-color: #57a678; background: var(--green-bg); color: #104c2b; }
+    .option-button.is-correct .option-label { background: #ccebd8; color: #104c2b; }
+    .option-button.is-wrong { border-color: #d7797e; background: var(--red-bg); color: #7f1e26; }
+    .option-button.is-wrong .option-label { background: #f4d2d4; color: #7f1e26; }
+    .option-button.is-selected { border-color: #8296cf; background: #f1f4ff; }
+    .feedback { min-height: 24px; margin: 12px 0 0; font-weight: 700; }
+    .feedback.correct { color: var(--green); }
+    .feedback.wrong { color: var(--red); }
+    .feedback.ungraded { color: #72540a; }
+    .feedback:focus { outline: none; }
+    .reference-list { margin: 8px 0 0; padding-left: 20px; font-size: .9rem; }
+    .reference-list li + li { margin-top: 4px; }
+    .final-score { margin-top: 18px; padding: 17px; border-radius: 10px; background: var(--surface-soft); border: 1px solid #c9d2ee; }
+    .final-score h3 { margin: 0 0 5px; }
+    .final-score p { margin: 0 0 12px; }
+    .error-banner { display: none; margin: 12px auto 0; width: min(100% - 32px, 1040px); padding: 12px 14px; background: var(--red-bg); border: 1px solid #e3a3a7; border-radius: 9px; color: #7f1e26; }
+    .error-banner.visible { display: block; }
+    .site-footer { width: min(100% - 32px, 1040px); margin: 0 auto 28px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: .88rem; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 640px) {
+      .header-inner { width: min(100% - 24px, 1040px); }
+      main { width: min(100% - 24px, 1040px); margin-top: 20px; }
+      .content-toolbar { display: block; }
+      .content-toolbar .pill { margin-top: 10px; }
+      .term-card, .question-card { padding: 15px; }
+      .test-toolbar { margin-left: -12px; margin-right: -12px; padding: 10px 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#home" data-action="home">Prefinal Study Reviewer</a>
+      <nav id="nav-controls" class="nav-controls" aria-label="Page navigation" hidden>
+        <button class="button" type="button" data-action="back">Back</button>
+        <button class="button" type="button" data-action="home">Home</button>
+      </nav>
+    </div>
+  </header>
+  <div id="app-error" class="error-banner" role="alert" aria-live="assertive"></div>
+  <main id="app">
+    <section class="screen" id="screen-dashboard" aria-labelledby="dashboard-title">
+      <p class="eyebrow">3rd Year · 1st Semester · Prefinal</p>
+      <h1 class="page-heading" id="dashboard-title">Choose a subject</h1>
+      <p class="lead">Open a subject to review its handout terms or practice the reconstructed prefinal test.</p>
+      <div id="subject-grid" class="subject-grid"></div>
+    </section>
+    <section class="screen" id="screen-subject" aria-labelledby="subject-title" hidden>
+      <p class="eyebrow">Prefinal subject</p>
+      <h1 class="page-heading" id="subject-title"></h1>
+      <p class="lead" id="subject-description"></p>
+      <div class="mode-grid">
+        <button class="mode-card" type="button" data-action="open-handouts">
+          <span class="mode-title">Handout</span>
+          <span class="small-label">Exact source wording with separate elaborations.</span>
+        </button>
+        <button class="mode-card" type="button" data-action="open-reviewer">
+          <span class="mode-title">Reviewer</span>
+          <span class="small-label">35-question test with Unshuffled and Shuffled modes.</span>
+        </button>
+      </div>
+    </section>
+    <section class="screen" id="screen-handout-menu" aria-labelledby="handout-menu-title" hidden>
+      <p class="eyebrow">Handout library</p>
+      <h1 class="page-heading" id="handout-menu-title"></h1>
+      <p class="lead">Select a source handout. Source quotations and learner elaborations are labeled separately.</p>
+      <div id="handout-grid" class="handout-grid"></div>
+    </section>
+    <section class="screen" id="screen-handout" aria-labelledby="handout-title" hidden>
+      <div class="content-toolbar">
+        <div>
+          <p class="eyebrow" id="handout-subject"></p>
+          <h1 class="page-heading" id="handout-title"></h1>
+          <p class="lead" id="handout-period"></p>
+        </div>
+        <span class="pill" id="handout-count"></span>
+      </div>
+      <div id="handout-content"></div>
+    </section>
+    <section class="screen" id="screen-reviewer-setup" aria-labelledby="reviewer-setup-title" hidden>
+      <p class="eyebrow" id="reviewer-subject"></p>
+      <h1 class="page-heading" id="reviewer-setup-title">Choose test order</h1>
+      <p class="lead">Unshuffled keeps the exam order and original A-D choices. Shuffled randomizes questions and choices for practice.</p>
+      <div class="mode-grid">
+        <button class="mode-card" type="button" data-action="start-test" data-mode="unshuffled">
+          <span class="mode-title">Unshuffled</span>
+          <span class="small-label">Original question and choice order from the test image.</span>
+        </button>
+        <button class="mode-card" type="button" data-action="start-test" data-mode="shuffled">
+          <span class="mode-title">Shuffled</span>
+          <span class="small-label">Randomized questions and options. Correctness follows the answer, not its old letter.</span>
+        </button>
+      </div>
+    </section>
+    <section class="screen" id="screen-test" aria-labelledby="test-title" hidden>
+      <div class="content-toolbar">
+        <div>
+          <p class="eyebrow" id="test-subject"></p>
+          <h1 class="page-heading" id="test-title"></h1>
+          <p class="lead" id="test-mode-label"></p>
+        </div>
+      </div>
+      <div class="test-toolbar" aria-label="Test progress">
+        <div class="score-row">
+          <span id="score-live" class="score-text" aria-live="polite"></span>
+          <span id="answered-live" class="small-label" aria-live="polite"></span>
+        </div>
+        <div class="progress-track" role="progressbar" id="test-progress" aria-label="Answered questions" aria-valuemin="0" aria-valuemax="35" aria-valuenow="0">
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+      </div>
+      <div id="question-list" class="question-list"></div>
+      <div id="final-score"></div>
+    </section>
+  </main>
+  <footer class="site-footer">Offline-ready single HTML · Prefinal study material</footer>
+  <script>
+    "use strict";
+
+    const externalReferences = {
+      openstaxFormula: { title: "OpenStax — Formula Review", url: "https://openstax.org/books/introductory-statistics-2e/pages/4-formula-review" },
+      openstaxSpread: { title: "OpenStax — Mean or Expected Value and Standard Deviation", url: "https://openstax.org/books/introductory-statistics-2e/pages/4-2-mean-or-expected-value-and-standard-deviation" },
+      openstaxPoisson: { title: "OpenStax — Poisson Distribution", url: "https://openstax.org/books/introductory-business-statistics/pages/4-4-poisson-distribution" },
+      nistBinomial: { title: "NIST — Binomial Distribution", url: "https://www.itl.nist.gov/div898/handbook/eda/section3/eda366i.htm" },
+      fbiScareware: { title: "FBI — ‘Scareware’ Distributors Targeted", url: "https://www.fbi.gov/news/stories/scareware-distributors-targeted" },
+      microsoftScareware: { title: "Microsoft Support — Prevent online scams with the scareware blocker in Microsoft Edge", url: "https://support.microsoft.com/en-us/edge/prevent-online-scams-with-the-scareware-blocker-in-microsoft-edge" }
+    };
+
+    const subjects = {
+      quant: {
+        id: "quant", name: "Quantitative Methods", code: "Quant1", description: "Probability distributions, expected values, and applications.",
+        handouts: [
+          {
+            id: "quant-distributions", title: "[5] Probabiliy Distribution [Prefinal]", pages: "8 pages",
+            terms: [
+              { term: "Random Variable", page: "p. 1", sourceText: "Random Variable (a.k.a. chance variable, a stochastic variable, or simply a variate) is a function whose domain is a sample space and whose range is some set of real numbers. It is usually denoted by capital or uppercase letters of the English alphabet (e. g., X), and the possible values of the variables are usually denoted by corresponding lowercase letters (e.g., x).", elaboration: "Big X represents the variable; lowercase x represents one possible value it can take." },
+              { term: "Discrete Random Variable", page: "p. 1", sourceText: "is a random variable that may assume a finite or countable number of possible outcomes that can be listed.", elaboration: "Think countable results such as the number of errors or students. You can list each possible value." },
+              { term: "Continuous Random Variable", page: "p. 1", sourceText: "is a random variable that may assume an uncountable number of values or possible outcomes, represented by the intervals on a number line.", elaboration: "A measurement such as height can take values between whole numbers, so it is modeled on an interval." },
+              { term: "Probability distribution", page: "p. 1", sourceText: "A probability distribution describes how the possible values of a random variable are distributed and how likely each value is to occur. It provides a systematic way of representing uncertainty and allows us to move from individual random outcomes to a model of what can be expected over many observations.", elaboration: "It pairs possible values with their probabilities so you can reason about repeated outcomes." },
+              { term: "Properties of a Probability Distribution", page: "p. 2", sourceText: "1. Probabilities cannot be negative. P(X = x) ≥ 0\n2. The probabilities must add up to 1. Σ P(X = x) = 1\n3. Events are mutually exclusive and collectively exhaustive.", elaboration: "Check that every probability is at least zero and that the full set of outcomes adds to one." },
+              { term: "Expected value", page: "p. 3", sourceText: "The expected value of a random variable is a weighted average of all its possible values, where the weights are their corresponding probabilities. For a discrete random variable X, the expected value is given by the sum of each outcome multiplied by the probability of the outcome.\nE(X) = Σ x · P(X = x)", elaboration: "Multiply each outcome by its chance, then add those products. It describes a long-run average, not a promise about one trial." },
+              { term: "Procedure for solutions of discrete probability distribution", page: "p. 3", sourceText: "1. Given: Experiment\n2. Define X\n3. List possible values of X\n4. Calculate P(X = x)\n5. Check Σ P(X = x) = 1\n6. Construct probability table\n7. Construct probability graph\n8. Interpret the distribution", elaboration: "Use this order to organize a full probability-distribution solution and catch probabilities that do not total one." },
+              { term: "Bernoulli Distribution", page: "p. 4", sourceText: "Models a single trial with two possible outcomes: success (1) with probability p, or failure (0) with probability 1 − p.", elaboration: "One trial, two labels: success or failure." },
+              { term: "Binomial Distribution", page: "p. 4", sourceText: "Models the number of successes (k) in n independent Bernoulli trials.\nP(X = k) = (n choose k) p^k (1 − p)^(n−k)", elaboration: "Use it when there is a fixed number of independent trials, two outcomes per trial, and the same success probability each time." },
+              { term: "Poisson Distribution", page: "pp. 4, 6", sourceText: "Models the number of independent events occurring in a fixed interval of time or space at a constant average rate λ.\nP(X = x) = μ^x e^(−μ) / x!", elaboration: "It models event counts in an interval when the rate is treated as constant. The handout also describes events as rare and independent." },
+              { term: "Geometric Distribution", page: "p. 4", sourceText: "Measures the number of repeated Bernoulli trials needed until the first success occurs.", elaboration: "Unlike binomial counting, the focus is how many trials it takes to reach the first success." },
+              { term: "Discrete Uniform Distribution", page: "p. 5", sourceText: "Assigns equal probability to a finite set of outcomes, such as rolling a fair six-sided die (P(X = x) = 1/6).", elaboration: "Every listed outcome has the same chance." },
+              { term: "Normal (Gaussian) Distribution", page: "p. 5", sourceText: "A symmetric, bell-shaped distribution parameterized by mean μ and standard deviation σ. As shown in the empirical rule above, 68.27% of observations fall within ±1σ, 95.45% within ±2σ, and 99.73% within ±3σ.", elaboration: "The empirical rule estimates how much data lies near the mean for a bell-shaped normal distribution." },
+              { term: "Continuous Uniform Distribution", page: "p. 5", sourceText: "Assigns constant probability density across a bounded interval [a, b], where f(x) = 1/(b−a).", elaboration: "Every equal-length subinterval has the same probability within the specified bounds." },
+              { term: "Exponential Distribution", page: "p. 5", sourceText: "Models the waiting time between consecutive events in a Poisson process with constant rate λ.", elaboration: "This models elapsed waiting time rather than the count of events." },
+              { term: "Student’s t-Distribution", page: "p. 5", sourceText: "Bell-shaped curve with heavier tails than the normal distribution, heavily used in hypothesis testing when sample sizes are small or population variance is unknown.", elaboration: "It allows more probability in the tails than the normal curve, especially useful in small-sample inference." },
+              { term: "Chi-Square (χ²) Distribution", page: "p. 5", sourceText: "Formed by summing the squares of independent standard normal variables; widely applied in variance testing and goodness-of-fit evaluations.", elaboration: "The handout connects this distribution to testing variance and whether observed data fit an expected pattern." },
+              { term: "Binomial characteristics", page: "p. 5", sourceText: "Fixed number of trials; independent trials; two mutually exclusive outcomes per trial, success or failure; fixed probability of success per trial.", elaboration: "Remember the four checks: fixed n, independence, two outcomes, and constant p." },
+              { term: "Poisson characteristics", page: "p. 6", sourceText: "Outcomes of interest are rare relative to possible outcomes; average outcomes per time or space interval is μ; occurrences are random and one does not influence another; probability is the same for all segments.", elaboration: "This captures the handout’s constant-rate, independent event-count assumptions." },
+            ]
+          }
+        ]
+      },
+      cyber: {
+        id: "cyber", name: "Information Assurance and Security", code: "Cyber", description: "Social engineering, insider threats, identity theft, sniffing, and countermeasures.",
+        handouts: [
+          {
+            id: "cyber-social", title: "[5] Social Engineering Techniques and Countermeasures [Prefinal]", pages: "16 pages",
+            terms: [
+              { term: "Social engineering", page: "p. 1", sourceText: "Social engineering is the art of manipulating people to divulge sensitive information to use it to perform some malicious action.", elaboration: "The attacker targets people and the decisions they make, rather than relying only on a technical flaw." },
+              { term: "Authority", page: "p. 3", sourceText: "This implies the right to exercise power in an organization.", elaboration: "An attacker may impersonate a manager or technician so the request feels official." },
+              { term: "Consensus or Social Proof", page: "p. 3", sourceText: "This refers to the fact that people are usually willing to like things or do things that other people like or do.", elaboration: "Fake testimonials can make a malicious product seem trusted because other people supposedly use it." },
+              { term: "Urgency", page: "p. 3", sourceText: "This implies encouraging people to take immediate action. Attackers can take advantage of this by tricking victims into performing unintended tasks.", elaboration: "A rush deadline can make someone click first and verify later." },
+              { term: "Phases of a Social Engineering Attack", page: "p. 5", sourceText: "1. Research the Target Company\n2. Select a Target\n3. Develop a Relationship\n4. Exploit the Relationship", elaboration: "The sequence starts with gathering information, then choosing and cultivating a target before using that relationship." },
+              { term: "Select a Target", page: "p. 5", sourceText: "Usually, attackers try to reach out to disgruntled employees because they are easier to manipulate.", elaboration: "The attacker chooses someone they believe may be more receptive to a request or offer." },
+              { term: "Reverse Social Engineering", page: "p. 6", sourceText: "In reverse social engineering, a perpetrator assumes the role of a knowledgeable professional so that the organization’s employees ask them for information. The attacker usually manipulates questions to draw out the required information.", elaboration: "Instead of directly asking for secrets, the attacker creates a role that encourages employees to ask them questions." },
+              { term: "Dumpster Diving", page: "p. 6", sourceText: "The process of retrieving sensitive personal or organizational information by searching through trash bins.", elaboration: "Paper or discarded media can expose information if the organization does not dispose of it safely." },
+              { term: "Pop-up Windows", page: "p. 7", sourceText: "Pop-ups trick or compel users into clicking a hyperlink that redirects them to fake web pages asking for personal information or downloading malicious programs such as keyloggers, trojans, or spyware.", elaboration: "A warning pop-up can be used as a lure, so the user should avoid clicking its links and verify through trusted channels." },
+              { term: "Hoax Letter", page: "p. 7", sourceText: "A message warning its recipients of a non-existent computer virus threat.", elaboration: "It spreads a false warning and can waste time or network resources; it is not the same as malware pop-ups that lock a screen." },
+              { term: "Chain Letter", page: "p. 7", sourceText: "A message offering free gifts, such as money and software, on the condition that the user forwards the email to a predetermined number of recipients.", elaboration: "The message uses a reward or story to persuade recipients to forward it." },
+              { term: "Scareware", page: "p. 8", sourceText: "A type of malware that tricks computer users into visiting malware-infested websites or downloading or buying potentially malicious software. Scareware is often seen in pop-ups that tell the target user that their machine has been infected with malware.", elaboration: "Scareware creates fear with fake infection alerts to push the user toward unsafe sites, downloads, or purchases." },
+              { term: "SMiShing (SMS Phishing)", page: "p. 9", sourceText: "Here, the SMS text messaging system is used to lure users into taking instant action, such as downloading malware, visiting a malicious webpage, or calling a fraudulent phone number.", elaboration: "Treat urgent texts with links or phone numbers as untrusted until verified through the institution’s official contact route." },
+              { term: "Malicious Insider", page: "p. 11", sourceText: "Malicious insider threats come from disgruntled or terminated employees who steal data or destroy company networks intentionally by injecting malware into the corporate network.", elaboration: "This insider intentionally abuses legitimate access." },
+              { term: "Negligent Insider", page: "p. 11", sourceText: "Insiders, who are uneducated on potential security threats or simply bypass general security procedures to meet workplace efficiency, are more vulnerable to social engineering attacks.", elaboration: "The threat comes from unsafe handling or skipped procedures, even without an intent to cause harm." },
+              { term: "Professional Insider", page: "p. 11", sourceText: "Professional insiders are the most harmful insiders. They use their technical knowledge to identify weaknesses and vulnerabilities in the company’s network and sell the organization’s confidential information to competitors or black-market bidders.", elaboration: "Technical expertise is misused to identify weaknesses and sell information." },
+              { term: "Compromised Insider", page: "p. 11", sourceText: "An outsider compromises an insider who has access to the critical assets or computing devices of an organization. This type of threat is more difficult to detect since the outsider masquerades as a genuine insider.", elaboration: "The outsider uses or impersonates insider access, which can make the activity look legitimate." },
+              { term: "Employee background verification", page: "p. 12", sourceText: "Ensure thorough background checks of all employees before hiring them by using Google search and social networking sites, and consulting previous employers.", elaboration: "This is a hiring-stage countermeasure against insider threats." },
+              { term: "Identity Theft", page: "p. 13", sourceText: "Identity theft occurs when someone steals others’ personally identifiable information for fraudulent purposes.", elaboration: "The stolen identity details are used to commit fraud or other unauthorized actions." },
+              { term: "Medical Identity Theft", page: "p. 14", sourceText: "The perpetrator uses the victim’s name or information without the victim’s consent or knowledge to obtain medical products and claim health insurance or healthcare services.", elaboration: "This can also corrupt medical records and lead to incorrect care decisions." },
+              { term: "Identity Cloning and Concealment", page: "p. 15", sourceText: "This type of identity theft encompasses all forms of identity theft, where the perpetrators attempt to impersonate someone else simply to hide their identity.", elaboration: "The impersonation is used to conceal who the perpetrator really is." },
+              { term: "Synthetic Identity Theft", page: "p. 15", sourceText: "The perpetrator obtains information from different victims to create a new identity. Firstly, he steals a Social Security Number and uses it with a combination of fake names, date of birth, address, and other details required for creating a new identity.", elaboration: "It combines real identifying information with fabricated details to construct a new identity." }
+            ],
+            details: [
+              { title: "Social engineering countermeasures", page: "pp. 9–10", sourceText: "Disseminate policies among employees and provide proper education and training.", elaboration: "The handout emphasizes making policies known and training employees to recognize social engineering." },
+              { title: "Identity theft countermeasures", page: "p. 15", sourceText: "Secure or shred all documents containing private information; Never give any personal information over the phone; Suspect and verify all requests for personal data.", elaboration: "Protect sensitive records, and independently verify requests before sharing information." }
+            ]
+          },
+          {
+            id: "cyber-network", title: "[6] Network Level Attack And Countermeasures (Part1) [Prefinal]", pages: "5 pages",
+            terms: [
+              { term: "Sniffing", page: "p. 1", sourceText: "Used by network administrators to perform network analysis, troubleshoot network issues, and monitor network sessions. Attackers used sniffing techniques to covertly investigate and capture critical information being transmitted in a network.", elaboration: "The same monitoring technique can serve legitimate administration or covert information gathering." },
+              { term: "Packet Sniffing", page: "p. 1", sourceText: "The process of monitoring and capturing all data packets passing through a given network using a software application or hardware device.", elaboration: "A packet sniffer observes traffic as it moves across a network." },
+              { term: "MAC address", page: "p. 1", sourceText: "A MAC address is a hardware address that uniquely identifies each node of a network.", elaboration: "Switches use MAC addresses to direct frames to network devices." },
+              { term: "Passive Sniffing", page: "p. 2", sourceText: "This involves sending no packets. It simply captures and monitors the packets flowing in the network.", elaboration: "It listens without injecting traffic and applies to a shared collision domain in the handout’s explanation." },
+              { term: "Active Sniffing", page: "p. 3", sourceText: "This searches for traffic on a switched LAN by actively injecting traffic into it.", elaboration: "The handout describes it as a way to search for traffic in switched Ethernet." },
+              { term: "MAC Flooding", page: "p. 3", sourceText: "A technique used to compromise the security of network switches that connect network segments or devices. Attackers use the MAC flooding technique to force a switch to act as a hub so that they can easily sniff the traffic.", elaboration: "The attacker overloads the switch’s address table so traffic may be broadcast more broadly." },
+              { term: "DHCP Starvation Attack", page: "p. 3", sourceText: "In a DHCP starvation attack, an attacker floods the DHCP server by sending numerous DHCP requests and uses all available IP addresses that the DHCP server can issue.", elaboration: "Exhausting the available address pool prevents the server from assigning addresses to legitimate devices." },
+              { term: "ARP Spoofing Attack", page: "p. 4", sourceText: "ARP spoofing involves constructing a large number of forged ARP request and reply packets to overload a switch.", elaboration: "Forged ARP messages can redirect traffic; the handout also links ARP spoofing to DoS, MITM, and session hijacking." },
+              { term: "MAC Spoofing/Duplicating", page: "p. 4", sourceText: "MAC duplicating refers to spoofing a MAC address with the MAC address of a legitimate user on the network.", elaboration: "The attacker copies a legitimate client’s hardware address to receive traffic destined for that client." }
+            ],
+            details: [
+              { title: "Sniffing attack sequence", page: "p. 3", sourceLabel: "Handout summary (not a direct quotation)", sourceText: "The handout describes a six-step flow: connect to a switch; determine network topology; identify the victim machine; use ARP spoofing; divert the victim’s traffic; extract sensitive information.", elaboration: "This is a concise study summary of the sequence; the full step descriptions are longer in the handout." },
+              { title: "Sniffing countermeasures", page: "p. 5", sourceLabel: "Handout excerpts", sourceText: "Use static IP addresses and ARP tables to prevent attackers from adding the spoofed ARP entries; Always encrypt the wireless traffic with a strong encryption protocol such as WPA or WPA2; Retrieve MAC addresses directly from NICs instead of the OS.", elaboration: "The first two measures protect address resolution and wireless traffic. The handout also notes retrieving MAC addresses from the network interface card (NIC)." },
+              { title: "Sensitive document disposal", page: "p. 10 of Social Engineering handout", sourceLabel: "Handout excerpt", sourceText: "Use shredders/burn bins for sensitive document disposal.", elaboration: "This reduces the chance that discarded records can be recovered through dumpster diving." }
+            ]
+          }
+        ]
+      },
+      se1: {
+        id: "se1", name: "Software Engineering 1", code: "SE1", description: "Use case validation and foundations for system design.",
+        handouts: [
+          {
+            id: "se1-usecases", title: "[5] USE CASE MODELING (PART 2) [Pre-Final]", pages: "2 pages",
+            terms: [
+              { term: "CRUD", page: "p. 1", sourceText: "Create, Read or Report, Update, and Delete.", elaboration: "CRUD lists the basic data operations to check against the use cases for each domain class." },
+              { term: "CRUD technique", page: "p. 1", sourceText: "Another important technique to validate a use case is the CRUD technique, which involves verifying that all of the needed use cases have been identified to maintain the data represented by the domain class.", elaboration: "It checks whether the system’s use cases cover the data operations that the domain model implies." },
+              { term: "CRUD as a cross-check", page: "p. 1", sourceText: "The CRUD technique is most useful when used as a cross-check along with the user goal technique.", elaboration: "First identify use cases through user goals, then use CRUD to find missing data-maintenance behavior." },
+              { term: "CRUD validation and refinement steps", page: "pp. 1–2", sourceText: "1. Identify all the domain classes involved in the new system.\n2. For each type of data (domain class), verify that a use case has been identified that creates a new instance, updates existing instances, reads or reports value of instances, and deletes (or archives) an instance.\n3. If a needed use case has been overlooked, add a new use case, and then identify the stakeholders.\n4. With integrated applications, make sure it is clear which application is responsible for adding and maintaining the data and which system merely uses data.", elaboration: "The method proceeds from classes, to coverage, to missing use cases, then clarifies data ownership across integrated systems." },
+              { term: "Primary requirements models", page: "p. 2", sourceText: "The use case diagram and the domain model class diagram are the primary models from which others draw information.", elaboration: "These models provide core requirements information for related analysis and design models." },
+              { term: "Domain model", page: "p. 2", sourceText: "The domain model is necessary to identify all the domain classes that are required in the new system. The domain model is also used to design the database.", elaboration: "The domain model helps identify the data concepts the system must represent and informs database design." }
+            ],
+            details: [
+              { title: "Model completeness", page: "p. 2", sourceLabel: "Handout summary (not a direct quotation)", sourceText: "A complete use case diagram helps show total system scope; supporting details such as use case descriptions, activity diagrams, and system sequence diagrams need only be prepared for use cases in a specific iteration. The domain model class diagram should be as complete as possible early in the project.", elaboration: "Scope can be mapped broadly while detailed supporting models are developed for the current iteration." }
+            ]
+          },
+          {
+            id: "se1-design", title: "[6] FOUNDATIONS FOR SYSTEM DESIGN [Pre-Finals]", pages: "6 pages",
+            terms: [
+              { term: "Systems design", page: "p. 1", sourceText: "Those system development activities that enable a person to describe in detail how the resulting information system will actually be implemented.", elaboration: "Design describes how the system will be constructed and organized." },
+              { term: "Systems analysis", page: "p. 1", sourceText: "Those system development activities that enable a person to understand and specify what the new system should accomplish.", elaboration: "Analysis focuses on the system’s required outcomes; design follows with implementation details." },
+              { term: "Analysis and design sequence", page: "p. 1", sourceText: "Analysis provides the starting point for design.\nDesign provides the starting point for implementation.", elaboration: "The analysis results feed design, and design outputs feed implementation." },
+              { term: "Design involvement", page: "p. 1", sourceText: "Design is much more oriented toward technical issues, and therefore requires less user involvement and more involvement by other system professionals.", elaboration: "Users primarily help clarify needs; system professionals work out the technical solution." },
+              { term: "Design activities", page: "pp. 1–2", sourceText: "Describe the environment — How will the system interact with other systems and with the organization's existing technologies?\nDesign the application components — What are the key parts of the information system, and how will they interact when the system is deployed?\nDesign user interface — How will users interact with the information system?\nDesign the database — How will data be captured, structured, and stored for later use by the information system?\nDesign the software classes and methods — What internal structure for each application component will ensure efficient construction, rapid deployment, and reliable operation?", elaboration: "The five activities cover context, components, user interaction, stored data, and internal software structure." },
+              { term: "Environment", page: "p. 2", sourceText: "External systems\nTechnology architecture: the set of computing hardware, network hardware and topology, and software employed by an organization.", elaboration: "Environment design considers neighboring systems and the technology in which the new system must operate." },
+              { term: "External-system interaction details", page: "p. 2", sourceText: "Precise message formats; Web or network addresses of sources and destinations; Communication protocols; Security methods; Error detection and recovery.", elaboration: "These details define how systems exchange information and handle failures safely." },
+              { term: "Application component", page: "p. 2", sourceText: "A well-defined unit of a software that performs one or more specific tasks.", elaboration: "Think of a component as a bounded part of the system with a defined responsibility." },
+              { term: "User-interface tools", page: "p. 2", sourceText: "mock-ups, storyboards, graphical layouts, and prototyping with screen-modeling tools.", elaboration: "These tools help teams and users examine the interface before full implementation." },
+              { term: "Requirements models", page: "p. 2, Figure 2", sourceText: "Domain model class diagram; use case diagram; activity diagram/use case description; system sequence diagram; requirements state machine diagram.", elaboration: "These models describe requirements and the system behavior expected from them." },
+              { term: "Design models", page: "p. 2, Figure 2", sourceText: "Component diagram; deployment diagram; design class diagram; interaction (sequence) diagram; design state machine diagram; package diagram.", elaboration: "These models describe technical structure and interactions used to build the system." },
+              { term: "Integrity controls", page: "p. 4", sourceText: "controls that reject invalid data inputs, prevent unauthorized data outputs and protect data and programs against accidental or malicious tampering.", elaboration: "Integrity controls protect data and programs across input, output, and modification." },
+              { term: "Input controls", page: "p. 4", sourceText: "controls that prevent invalid or erroneous data from entering the system.", elaboration: "They help keep incorrect data from becoming part of system records." },
+              { term: "Output controls", page: "p. 4", sourceText: "controls that ensure that output arrives at the proper destination and is accurate, current, and complete.", elaboration: "These checks protect where output goes and whether it is reliable." },
+              { term: "Backup procedures", page: "p. 4", sourceText: "Backup procedures make partial or full copies of a file system (data and software) or a database to removable storage media, such as magnetic tape, or a data storage device or servers at another site.", elaboration: "A backup is a copy intended to be available if the primary data or system is damaged." },
+              { term: "Recovery procedures", page: "p. 4", sourceText: "Recovery procedures read off-site copies and replicate their contents to a server that can provide access to programs and users.", elaboration: "Recovery uses copies to restore service and user access after a failure." },
+              { term: "Fraud triangle", page: "p. 5", sourceText: "a model of fraud that states that opportunity, motivation, and rationalization must all exist for a fraud to occur.", elaboration: "The handout presents three conditions that together enable fraud." },
+              { term: "Opportunity, Motivation, Rationalization", page: "p. 5", sourceText: "Opportunity. The ability of a person to take actions that perpetrate a fraud.\nMotivation. A desire or need for the results of the fraud.\nRationalization – an excuse for committing the fraud or an intention to ‘undo’ the fraud in the future.", elaboration: "Opportunity is ability, motivation is desire or need, and rationalization is the excuse used to justify the act." }
+            ],
+            details: [
+              { title: "Input control types", page: "p. 4", sourceText: "Value limit controls; completeness controls; data validation controls; field combination controls.", elaboration: "The test asks you to distinguish these by the kind of input error each one catches." }
+            ]
+          }
+        ]
+      }
+    };
+
+    const exams = {
+      quant: [
+        {n:1,q:"Which of the following assumes a finite or countable number of possible outcomes that can be listed?",o:["Continuous Random Variable","Discrete Random Variable","Random Variable","None of the above"],key:"B"},
+        {n:2,q:"Which symbol denotes a random variable?",o:["f(x)","P(X = x)","x","X"],key:"D"},
+        {n:3,q:"What are the classifications of a discrete probability distribution?",o:["Binomial, Exponential, Uniform","Binomial, Hypergeometric, Normal","Binomial, Hypergeometric, Poisson","Binomial, Normal, Uniform"],key:"C",issue:"Hypergeometric is not named in this handout. This answer identity was checked against OpenStax; see the reference below.",refs:["openstaxFormula"]},
+        {n:4,q:"Which of the following statements is true about binomial distribution?",o:["Successive trials in binomial distribution are dependent","Successive trials in binomial distribution are equally likely","Successive trials in binomial distribution are independent","Successive trials in binomial distribution are mutually exclusive"],key:"C"},
+        {n:5,q:"What do you call a function whose domain is a sample space and whose range is a set of real numbers?",o:["Continuous Random Variable","Discrete Random Variable","Random Variable","None of the above"],key:"C"},
+        {n:6,q:"Which probability distribution is appropriate for a count of events when the events of interest occur randomly, independently of one another, and rarely?",o:["Binomial distribution","Exponential distribution","Normal distribution","Poisson distribution"],key:"D"},
+        {n:7,q:"Which of the following is NOT a characteristic of a binomial distribution?",o:["The experiment consists of a sequence of n identical trials.","The probability of success and failure changes from trial to trial.","The trials are independent.","Two (2) outcomes are possible on each trial: success and failure."],key:"B"},
+        {n:8,q:"What happens if the outcomes of a discrete random variable follow a Poisson distribution?",o:["Their mean is equal to the variance.","Their mean is equal to the standard deviation.","Their median is equal to the variance.","Their median is equal to the standard deviation."],key:"A",issue:"The handout does not state this identity. OpenStax gives Poisson variance equal to its mean.",refs:["openstaxFormula"]},
+        {n:9,q:"Which of the following is given by the expected value of a discrete random variable ‘x’?",o:["Σ[P(X = x)]","Σ[x · P(X = x)]","P(X = x)","1"],key:"B"},
+        {n:10,q:"Which of the following assumes an uncountable number of values or possible outcomes represented by the intervals on a number line?",o:["Continuous Random Variable","Discrete Random Variable","Random Variable","None of the above"],key:"A"},
+        {n:11,q:"Which of the following statements is true about binomial distribution?",o:["Each trial in binomial distribution has one (1) outcome.","Each trial in binomial distribution has two (2) outcomes.","Each trial in binomial distribution has three (3) outcomes.","Each trial in binomial distribution has four (4) outcomes."],key:"B"},
+        {n:12,q:"Which symbol denotes the possible values of the variables?",o:["f(x)","P(X = x)","x","X"],key:"C"},
+        {n:13,q:"Which of the following is given by the variance of a discrete random variable ‘x’?",o:["Σ[(x)² · P(X = x)]","Σ[(x − μₓ)² · P(X = x)]","Σ[(x + μₓ)² · P(X = x)]","Σ[(P(X = x))²]"],key:"B",issue:"The handout does not give this variance formula. OpenStax provides the discrete-variable standard-deviation formula, whose squared term is the variance.",refs:["openstaxSpread"]},
+        {n:14,q:"What do you call the sum of the product of each value of a discrete random variable X times its probability?",o:["Expected value","Mean","Variance","Both A and B"],key:"D"},
+        {n:15,q:"Which of the following describes standard deviation?",o:["It is the square root of the variance.","It is a measure of its centrality or location.","It is a weighted average, with the values of the random variable weighted by their probabilities.","It is subtracted from the expected value, squared, and multiplied by the probability of occurrence of that value, and then the results are summed."],key:"A",issue:"This fact is not stated in the handout; OpenStax defines standard deviation as the square root of variance.",refs:["openstaxSpread"]},
+        {n:16,q:"There are four (4) machines. It is known that exactly two (2) of them are faulty. They are tested, one by one, in random order until both faulty machines are identified. What is the probability that only two (2) tests are needed?",o:["1/2","1/3","1/4","1/6"],key:null,issue:"Ambiguous stopping rule. If two good tests are enough to identify the remaining two as faulty, the probability is 1/3. If both faulty machines must be physically tested, the probability is 1/6. This item is not scored."},
+        {n:17,q:"A game consists of rolling a colored die with three (3) red sides, two (2) green sides, and one (1) blue side. A roll of red loses. A roll of green pays P104.34. A roll of blue pays P260.85. The charge to play the game is P104.34. What is the expected value?",o:["−P78.25","−P26.09","P0","P34.95"],key:"B"},
+        {n:18,q:"(I) A meteorologist reports that there is a 30% chance of rain on Monday, 40% on Tuesday, and 90% on Wednesday. A binomial distribution can be used to determine the probability of rain on two of the three days. (II) The probability that the price of XYZ stock on a particular day will rise is 15%, to stay the same is 50%, and to fall is 35% is an example of a binomial distribution.",o:["The first statement is correct, while the second statement is incorrect.","The first statement is incorrect, while the second statement is correct.","Both statements are correct.","Both statements are incorrect."],key:"D"},
+        {n:19,q:"A bag contains 4 red and 3 black balls. The second bag contains 2 red and 4 black balls. 1 bag is selected at random. If 1 ball is drawn from the selected bag, what is the probability that the ball drawn is red?",o:["3/41","1/42","9/42","19/42"],key:"D"},
+        {n:20,q:"(I) The height of a player on a basketball team is an example of a continuous random variable. (II) The number of cups of coffee sold in a cafeteria during lunch is an example of a continuous random variable.",o:["The first statement is correct, while the second statement is incorrect.","The first statement is incorrect, while the second statement is correct.","Both statements are correct.","Both statements are incorrect."],key:"A"},
+        {n:21,q:"A student group sells 500 raffle tickets for P104.34 each. At the drawing, the top prize will be a gift certificate for P5,217.00; the second prize will be a P2,608.50 gift card; and there will be five (5) third prizes, each a P1,043.40 gift card. What is the expected value of a ticket?",o:["Lose an average of P78.25","Lose an average of P286.94","Lose an average of P521.70","Win an average of P104.34"],key:null,issue:"Exact net expected value is −P78.255 (normally rounded to −P78.26). Option A (−P78.25) appears intended but does not match standard two-decimal rounding, so this item is not scored."},
+        {n:22,q:"Suppose you have to pay P52.17 to roll a fair die with the understanding you will get P156.51 back rolling a 4 or a 2. What is the expected amount that you can win?",o:["−P52.17","P0.00","P52.17","P156.51"],key:"B"},
+        {n:23,q:"In binomial distribution, what is the value of P(X=7) given that n=6 and p=0.92?",o:["Less than zero","Zero","More than zero","One"],key:"B"},
+        {n:24,q:"Five horses are in the race. Mr. A selects two (2) of the horses at random and bets on them. What is the probability that Mr. A selected the winning horse?",o:["1/5","2/5","3/5","4/5"],key:"B"},
+        {n:25,q:"Given the following data, find the expected value and round off to three (3) decimal places.",o:["0","0.4","0.6","1.1"],key:null,issue:"The table lists probabilities 0.5, 0.2, and 0.2, which total 0.9. The weighted sum is 0.600, but the given values do not form a complete probability distribution. Not scored."},
+        {n:26,q:"A manufacturer produces rolls of wallpaper. A flaw occurs when the pattern is not consistent. A 20-meter sample from each roll is inspected. It is believed that the number of flaws per sample follows a Poisson distribution with a mean of one (1) flaw per 20-meter sample. What is the probability that at least two (2) flaws will appear in a 20-meter sample?",o:["0.2642","0.3246","0.4568","0.7358"],key:"A"},
+        {n:27,q:"Which two (2) events are mutually exclusive?",o:["Drawing a card from a deck and getting a king or a club.","Rolling a die and getting an even number or a 6.","Rolling two (2) dice and getting doubles or getting a sum of eight (8).","Tossing two (2) coins and getting two (2) heads or two (2) tails."],key:"D"},
+        {n:28,q:"A random variable X has a binomial distribution with n = 10 and p = 0.3. What is the variance of X?",o:["2.1","10","12","21"],key:"A",issue:"The handout does not give the binomial variance formula. NIST lists the binomial standard deviation as √np(1−p), giving variance np(1−p)=2.1 here.",refs:["nistBinomial"]},
+        {n:29,q:"Which of the following conditions do the binomial and Poisson distributions approximately give the same results?",o:["When p and q are equal and n is small","When p is small and n is small","When p is small and n is large","When p and q are equal"],key:"C",issue:"The handout does not state this approximation condition. OpenStax describes the Poisson approximation when n is large and p is small.",refs:["openstaxPoisson"]},
+        {n:30,q:"At what classification of a random variable can the number of students in a class be categorized?",o:["Absolute variable","Continuous variable","Discrete variable","None of the above"],key:"C"},
+        {n:31,q:"Suppose a life insurance company sells a P12,510,000.00 worth of one-year term life insurance policy to a 25-year-old female for P10,946.25. The probability that the female survives the year is .999592. Find the expected value of this policy for the insurance company.",o:["P5,838.00","P6,515.63","P6,828.38","P7,297.50"],key:null,issue:"Using the printed values: premium − expected payout = 10,946.25 − 12,510,000(1−0.999592) = P5,842.17. None of the choices match. Not scored."},
+        {n:32,q:"The number of traffic accidents that occurs on a particular stretch of road during a month follows a Poisson distribution with a mean of 7.4. Find the probability that fewer than three (3) accidents will occur next month on this stretch of road.",o:["0.021871","0.978129","0.063113","0.936847"],key:"A"},
+        {n:33,q:"In 1986, the space shuttle Challenger exploded, resulting in the death of all seven (7) astronauts. In 1995, NASA estimated that the probability of a catastrophic occurrence such as this was about 1 in 60000. The Challenger flight was the 25th mission. Use the Poisson distribution to calculate the probability of the occurrence.",o:["0.0001","0.0003","0.0004","0.0025"],key:"C"},
+        {n:34,q:"You pick a card from a deck. If you get a face card, you will win P260.85. If you get an ace, you will win P1,565.10 plus an extra P3,130.20 for ace of hearts. For any other card, you will win nothing. Find the expected value that you can possibly win.",o:["P200.85","P210.77","P241.03","P260.85"],key:null,issue:"Expected payout = [12(260.85)+4(1,565.10)+3,130.20]/52 = P240.78. None of the choices match. Not scored."},
+        {n:35,q:"A multiple-choice test has 30 questions. There are four (4) choices for each question. Student X, who has not studied for the test, decides to answer all the questions randomly by guessing the answer to each question. Which of the following probability distributions can be used to calculate the student’s chance of getting at least 20 questions right?",o:["Binomial distribution","Exponential distribution","Normal distribution","Poisson distribution"],key:"A"}
+      ],
+      cyber: [
+        {n:1,q:"It is a type of insider who is uneducated on the latest potential security threats or bypasses general security procedures to achieve workplace efficiency.",o:["Malicious Insider","Negligent Insider","Professional Insider","Compromised Insider"],key:"B"},
+        {n:2,q:"It is an attack where an attacker floods the DHCP server by sending numerous DHCP requests and uses all available IP addresses.",o:["ARP Spoofing","DNS Poisoning","MAC Duplicating","DHCP Starvation Attack"],key:"D"},
+        {n:3,q:"It is the art of manipulating people to divulge sensitive information, which can then be used to perform a malicious action.",o:["Malware","DDoS Attack","Social Engineering","Vulnerability Assessment"],key:"C"},
+        {n:4,q:"This social engineering technique tricks or compels users to click a hyperlink that redirects to fake web pages.",o:["Spimming","Hoax Letter","Eavesdropping","Pop-Up Windows"],key:"D"},
+        {n:5,q:"It is a type of identity theft where the perpetrator obtains information from different victims to create a new identity by stealing a Social Security number and using it with a combination of fake names, dates of birth, addresses, and other details required for creating a new identity.",o:["Tax Identity Theft","Medical Identity Theft","Synthetic Identity Theft","Identity Cloning and Concealment"],key:"C"},
+        {n:6,q:"This occurs when someone steals others' personally identifiable information for fraudulent purposes.",o:["Identity Theft","Insider Attack","Mobile Attack","Wireless Attack"],key:"A"},
+        {n:7,q:"This malware tricks computer users into visiting malware-infested websites by telling the target user that their machine has been infected with malware.",o:["Worm","Trojan","Rootkit","Scareware"],key:"D"},
+        {n:8,q:"It encompasses all forms of identity theft, where the perpetrators attempt to impersonate someone else simply to hide their original profile.",o:["Tax Identity Theft","Financial Identity Theft","Synthetic Identity Theft","Identity Cloning and Concealment"],key:"D"},
+        {n:9,q:"It is a hardware address that uniquely identifies each node of a network.",o:["URL","IP Address","MAC Address","Domain Name"],key:"C"},
+        {n:10,q:"It is the phase of a social engineering attack where attackers try to reach out to disgruntled employees, as they are easier to manipulate.",o:["Select a Target","Develop a Relationship","Exploit the Relationship","Research the Target Company"],key:"A"},
+        {n:11,q:"This is the technique used to compromise the security of network switches that connect network segments or devices.",o:["MAC Flooding","DNS Poisoning","MAC Duplicating","DHCP Starvation Attack"],key:"A"},
+        {n:12,q:"Network administrators use it to perform network analysis, troubleshoot network issues, and monitor network sessions.",o:["Sniffing","Phishing","Keylogging","SQL Injection"],key:"A"},
+        {n:13,q:"This vulnerability behavior occurs when attackers encourage people to take immediate actions, tricking them into performing unintended tasks.",o:["Trust","Urgency","Scarcity","Intimidation"],key:"B"},
+        {n:14,q:"It is the sniffing that searches for traffic on a switched LAN by actively injecting traffic into it.",o:["Active Sniffing","Passive Sniffing","Packet Forwarding","Man-in-the-Middle"],key:"A"},
+        {n:15,q:"This insider threat comes from disgruntled or terminated employees who steal data or destroy company networks intentionally by injecting malware into the corporate network.",o:["Malicious Insider","Negligent Insider","Professional Insider","Compromised Insider"],key:"A"},
+        {n:16,q:"Which of the following is considered a purpose of identity theft?",o:["To submit fraudulent tax returns","To buy the victim's personal information","To keep the victim's insurance policies safe","To leave reviews on goods online using a drop-site"],key:"A"},
+        {n:17,q:"A system administrator with deep technical expertise identifies vulnerabilities in the network and secretly sells them to a hacker group. Which of the following types of insider is involved in this case?",o:["Malicious Insider","Negligent Insider","Professional Insider","Compromised Insider"],key:"C"},
+        {n:18,q:"Clark, a professional hacker, targeted an organization's network to steal credentials being shared during active sessions. He collected the physical address of the legitimate users connected to the switch port. Then, Clark started spoofing his physical address with the physical address of a legitimate client and received all the traffic destined for that client. Which of the following attacks has Clark performed in the above scenario?",o:["ARP Spoofing","DNS Poisoning","MAC Duplication","DHCP Starvation Attack"],key:"C"},
+        {n:19,q:"Abin, an attacker intending to access the critical assets and computing devices of an organization, impersonated Sally, a system administrator. Abin masquerades as Sally and gathers vital information from the computing devices of the target organization. Which of the following insider threats was demonstrated?",o:["Malicious Insider","Negligent Insider","Professional Insider","Compromised Insider"],key:"D"},
+        {n:20,q:"An organization decides to secure its wireless traffic to prevent sniffing. Which of the following should it always implement?",o:["Static IP addressing","Use POP instead of POP3","Disable SSID broadcast only","Encrypt the wireless traffic with WPA or WPA2"],key:"D"},
+        {n:21,q:"Rina, a student, was browsing online for information about her research project. She clicked on a link and suddenly saw many warning windows on her laptop about a virus that she couldn't close. She became suspicious and reached out to her friend, who advised her to install reputable antivirus software. Which of the following types of attack was performed on Rina?",o:["Hoax Letter","Spam Email","Chain Letter","Instant Chat Messenger"],key:null,issue:"No listed choice matches the handout concept. The described malicious pop-up warnings are scareware; this item is not scored.",refs:["fbiScareware","microsoftScareware"]},
+        {n:22,q:"A new employee was hired without proper background checks. Later, it was discovered that the employee was secretly passing sensitive client lists to a competitor. Which countermeasure should have been applied during the hiring process?",o:["Layered Defense","Controlled Access","Separation of Duties","Employee Background Verification"],key:"D"},
+        {n:23,q:"Don, a professional hacker, telephoned Bob and claimed to be a network administrator in the target organization. Don informed Bob about a security incident in the network and asked him to provide his account credentials to secure his data. After obtaining these credentials, Don retrieved sensitive information from Bob's account. Which of the following vulnerable behaviors was showcased by Don?",o:["Liking","Authority","Familiarity","Social Proof"],key:"B"},
+        {n:24,q:"In which of the following phases of a social engineering attack do attackers try to reach out to disgruntled employees, as they are easier to manipulate?",o:["Select a Target","Develop a Relationship","Exploit the Relationship","Research the Target Company"],key:"A"},
+        {n:25,q:"Ross, a professional hacker, created a fake website and posted fake testimonials about a malicious anti-malware program that he developed. Upon reading the counterfeit testimonials, some of the lured customers downloaded and installed the anti-malware. Which of the following behaviors made customers vulnerable to the attack?",o:["Urgency","Familiarity","Social Proof","Intimidation"],key:"C"},
+        {n:26,q:"An attacker floods a switch with fake MAC addresses, forcing it to broadcast packets like a hub. Which of the following techniques is this?",o:["ARP Spoofing","MAC Flooding","DNS Poisoning","Passive Sniffing"],key:"B"},
+        {n:27,q:"Smith, a professional hacker, initiated a network sniffing attack on the switched Ethernet environment of a target organization. He employed an automated tool to flood the switch with a fake physical address until the switch translation table became full. When the switch entered fail-open mode, it started acting as a hub by broadcasting packets. Now, Smith could easily accomplish his goal of network sniffing. Which of the following types of attack was performed by Smith?",o:["MAC Flooding","ARP Poisoning","DNS Poisoning","DHCP Starvation"],key:"A"},
+        {n:28,q:"Which of the following countermeasures helps security teams defend against sniffing attacks?",o:["Always broadcast SSIDs","Use a hub instead of a switch","Use static IP addresses and ARP tables","Retrieve MAC addresses directly from the OS instead of the NICs"],key:"C"},
+        {n:29,q:"A hospital discovers that a patient's medical record contains entries for surgeries and prescriptions they never received. Investigations reveal a thief used the patient's identity to get free healthcare. Which type of identity theft does this demonstrate?",o:["Child Identity Theft","Medical Identity Theft","Synthetic Identity Theft","Insurance Identity Theft"],key:"B"},
+        {n:30,q:"Julius, a professional hacker, impersonates an external auditor and tries to have a conversation with one of the employees of his target organization. He encouraged the employee to ask questions and then manipulated certain questions to draw out the required information. Which of the following attack techniques was portrayed by Julius?",o:["Tailgating","Piggybacking","Dumpster Diving","Reverse Social Engineering"],key:"D"},
+        {n:31,q:"A staff member notices financial reports discarded in an open trash bin behind the building. Which of the following measures would have prevented this risk?",o:["Lock discarded files in a storage cabinet","Password-protect all physical documents","Require staff to keep sensitive papers at home","Use shredders or burn bins for document disposal"],key:"D"},
+        {n:32,q:"A new hire in the IT department was found to be feeding sensitive network data to a competitor. HR admitted they had not checked the candidate's employment history. Which of the following countermeasures should be enforced during hiring?",o:["Provide the employee with reduced salary benefits","Increase working hours to observe employee behavior","Conduct thorough employee background verification","Allow immediate full access to all systems for productivity"],key:"C"},
+        {n:33,q:"An employee receives an SMS: “Your bank account is locked. Click this link to verify within 1 hour.” The message includes a convincing logo. Which of the following should the employee do?",o:["Reply to the SMS requesting more details","Click the link to secure the account quickly","Ignore and contact the bank through official channels","Forward the SMS to family and friends to confirm if they also got it"],key:"C"},
+        {n:34,q:"An intruder pinpoints the computer they want to attack after mapping the network. Which of the following describes this sniffing step?",o:["Extract sensitive information","Determine network topology","Identify the victim's machine","Discover the switch and connect"],key:"C"},
+        {n:35,q:"An intruder connects a laptop to an available switch port to gain network access. Which of the following is the first step in their sniffing approach?",o:["Determine network topology","Use ARP spoofing techniques","Divert traffic to the attacker's computer","Discover the appropriate switch to access the network and connect a system or laptop"],key:"D"}
+      ],
+      se1: [
+        {n:1,q:"This design activity answers the question, “how will data be captured, structured, and stored for later use by the information system?”",o:["Describing the environment","Designing the application components","Designing the user interface","Designing the database"],key:"D"},
+        {n:2,q:"These are controls that prevent invalid or erroneous data from entering the system.",o:["Integrity controls","Input controls","Output controls","Fraud controls"],key:"B"},
+        {n:3,q:"It is designed as the computing hardware, network hardware and topology, and software used by an organization.",o:["External system","Technology architecture","Communication protocol","Security method"],key:"B"},
+        {n:4,q:"This design activity answers the question, “what are the key parts of the information system?”",o:["Describing the environment","Designing the application components","Designing the user interface","Designing the software classes and methods"],key:"B"},
+        {n:5,q:"This input control type ensures that numeric fields that contain codes or identifiers are correct.",o:["Value limit control","Completeness control","Data validation control","Field combination control"],key:"C"},
+        {n:6,q:"This design activity answers the question, “how will users interact with the information system?”",o:["Describing the environment","Designing the application components","Designing the user interface","Designing the software classes and methods"],key:"C"},
+        {n:7,q:"It aims to describe in detail how the ne[…] be implemented.",o:["Analysis","Design","Implementation","Testing"],key:"B",issue:"The right edge of this exam image is cropped. The stem is shown only as visible; no missing text has been supplied."},
+        {n:8,q:"It aims to build a new system that fulfills us[…].",o:["Analysis","Design","Implementation","Testing"],key:"C",issue:"The right edge of this exam image is cropped. The stem is shown only as visible; no missing text has been supplied."},
+        {n:9,q:"This input control type ensures that all required data values describing an object or transaction are present.",o:["Value limit control","Completeness control","Data validation control","Field combination control"],key:"B"},
+        {n:10,q:"It aims to understand and specify what the new system will accomplish.",o:["Analysis","Design","Implementation","Testing"],key:"A"},
+        {n:11,q:"These procedures are designed to protect software data from hardware failure.",o:["Fraud prevention","Redundancy, backup, and recovery","Communication protocols","Integrity controls"],key:"B"},
+        {n:12,q:"These are controls that protect data and programs against accidental or malicious tampering.",o:["Integrity controls","Input controls","Output controls","Fraud controls"],key:"A"},
+        {n:13,q:"This design activity makes use of mock-ups, storyboards, and graphical layouts.",o:["Describing the environment","Designing the application component","Designing the user interface","Designing the database"],key:"C"},
+        {n:14,q:"It is a well-defined unit of a software that performs one or more specific tasks.",o:["External system","Technology architecture","Application component","Communication protocol"],key:"C"},
+        {n:15,q:"This design activity answers the question, “How will the system interact with other systems and the organization’s existing technologies?”",o:["Describing the environment","Designing the application components","Designing the user interface","Designing the software classes and method"],key:"A"},
+        {n:16,q:"Which of the following is NOT primarily considered when designing a database?",o:["Performance","Security Issues","User interface","Encryption issues"],key:"C"},
+        {n:17,q:"Which of the following is a requirements model?",o:["Component diagram","Deployment diagram","Use case diagram","Design class diagram"],key:"C"},
+        {n:18,q:"Which of the following is a requirements model?",o:["System sequence diagram","Interaction diagram","Design state machine diagram","Package diagram"],key:"A"},
+        {n:19,q:"Which of the following is NOT an input control?",o:["Value limit control","Printing access control","Completeness control","Data validation control"],key:"B"},
+        {n:20,q:"What is the first step in the CRUD technique for validating and refining use cases?",o:["For each type of data (domain class), verify that a use case has been identified.","Identify all the domain classes involved in the new system.","If a needed use case has been overlooked, add a new use case and then identify the stakeholders.","With integrated applications, make sure it is clear which application is responsible for adding and maintaining the data."],key:"B"},
+        {n:21,q:"Which best describes recovery procedures?",o:["These procedures make partial or full copies of a file system to a data storage device or servers at another site.","These procedures read off-site copies and replicate their contents to a server.","These procedures prevent invalid or erroneous data from entering the system.","These procedures ensure that output arrives at the proper destination and is accurate, current, and complete."],key:"B"},
+        {n:22,q:"Which of the following steps in the CRUD technique for validating and refining use cases comes second?",o:["For each type of data (domain class), verify that a use case has been identified.","Identify all the domain classes involved in the new system.","If a needed use case has been overlooked, add a new use case and then identify the stakeholders.","With integrated applications, make sure it is clear which application is responsible for adding and maintaining the data."],key:"A"},
+        {n:23,q:"Which of the following is a design model?",o:["Domain model class diagram","Interaction diagram","Use case diagram","Activity diagram"],key:"B"},
+        {n:24,q:"Which of the following steps in the CRUD technique for validating and refining use cases comes last?",o:["For each type of data (domain class), verify that a use case has been identified.","Identify all the domain classes involved in the new system.","If a needed use case has been overlooked, add a new use case and then identify the stakeholders.","With integrated applications, make sure it is clear which application is responsible for adding and maintaining the data."],key:"D"},
+        {n:25,q:"What does opportunity mean in the fraud triangle?",o:["The ability of a person to take actions that perpetrate a fraud","A desire or need for the results of the fraud","An excuse for committing the fraud","An intention to “undo” the fraud in the future"],key:"A"},
+        {n:26,q:"Which best describes backup procedures?",o:["These procedures make partial or full copies of a file system to a data storage device or servers at another site.","These procedures read off-site copies and replicate their contents to a server.","These procedures prevent invalid or erroneous data from entering the system.","These procedures ensure that output arrives at the proper destination and is accurate, current, and complete."],key:"A"},
+        {n:27,q:"What does rationalization mean in the fraud triangle?",o:["The ability of a person to take actions that perpetrate a fraud","A desire or need for the results of the fraud","An excuse for committing the fraud","A need for continuous access to data and systems"],key:"C"},
+        {n:28,q:"What does motive mean in the fraud triangle?",o:["The ability of a person to take actions that perpetrate a fraud","A desire or need for the results of the fraud","An excuse for committing the fraud","An intention to “undo” the fraud in the future"],key:"B"},
+        {n:29,q:"Which of the following steps in the CRUD technique for validating and refining use cases comes third?",o:["For each type of data (domain class), verify that a use case has been identified.","Identify all the domain classes involved in the new system.","If a needed use case has been overlooked, add a new use case and then identify the stakeholders.","With integrated applications, make sure it is clear which application is responsible for adding and maintaining the data."],key:"C"},
+        {n:30,q:"Which of the following is a design model?",o:["Use case diagram","Activity diagram","System sequence diagram","Package diagram"],key:"D"},
+        {n:31,q:"Which design task determines how system functionality is organized and how components will interact at runtime?",o:["Describing the environment","Designing the application components","Designing the database schema","Designing output distribution controls"],key:"B"},
+        {n:32,q:"CRUD helps enforce which requirement[…] relationship between system behavior and […]",o:["All actors must initiate system events […] data is created.","Every use case must produce printed […] traceability.","Each domain class must be tied to behaviors that maintain or access its data.","All use cases must be decomposed into […] diagrams."],key:"C",issue:"The right edge of this exam image is cropped. The visible stem and incomplete choices A, B, and D are preserved; missing text has not been guessed."},
+        {n:33,q:"Which statement best explains why CRUD is[…] after identifying initial use cases?",o:["It acts as a cross-check to reveal missing create, read, update, or delete requirements for domain classes.","It replaces the need for stakeholder validation of system behavior.","It ensures UI layouts match database fields.","It prioritizes performance requirements before modeling data."],key:"A",issue:"The right edge of this exam image is cropped. The visible stem is preserved; no missing text has been supplied."},
+        {n:34,q:"Why does the design phase require less user involvement than analysis?",o:["Design focuses on technical solution details handled primarily by system professionals.","Users cannot participate after the SSD is completed.","Design eliminates the need for user validation of requirements.","User involvement is restricted to security-related decisions."],key:"A"},
+        {n:35,q:"Which information is essential when defining system interactions with external systems?",o:["Message formats, communication protocols, and security methods","The preferred file-naming patterns of the development team","The number of physical printers on the network","The visual theme of the graphical interface"],key:"A"}
+      ]
+    };
+
+    const state = {
+      screen: "screen-dashboard",
+      history: [],
+      subjectId: null,
+      handoutId: null,
+      mode: null,
+      attempt: null
+    };
+    const LETTERS = ["A", "B", "C", "D"];
+
+    function byId(id) {
+      const node = document.getElementById(id);
+      if (!node) throw new Error("The page is missing a required section: " + id);
+      return node;
+    }
+
+    function make(tagName, className, text) {
+      const node = document.createElement(tagName);
+      if (className) node.className = className;
+      if (text !== undefined && text !== null) node.textContent = String(text);
+      return node;
+    }
+
+    function actionButton(label, action, extra) {
+      const button = make("button", "button", label);
+      button.type = "button";
+      button.setAttribute("data-action", action);
+      if (extra) {
+        for (const [key, value] of Object.entries(extra)) button.setAttribute("data-" + key, String(value));
+      }
+      return button;
+    }
+
+    function showError(message) {
+      const banner = document.getElementById("app-error");
+      if (!banner) return;
+      banner.textContent = message;
+      banner.classList.add("visible");
+    }
+
+    function clearError() {
+      const banner = document.getElementById("app-error");
+      if (!banner) return;
+      banner.textContent = "";
+      banner.classList.remove("visible");
+    }
+
+    function showScreen(id) {
+      const requested = document.getElementById(id);
+      if (!requested || !requested.classList.contains("screen")) {
+        showError("The requested page could not be opened. Use Home to return to the dashboard.");
+        return false;
+      }
+      document.querySelectorAll(".screen").forEach((screen) => { screen.hidden = screen.id !== id; });
+      const nav = document.getElementById("nav-controls");
+      if (nav) nav.hidden = id === "screen-dashboard";
+      state.screen = id;
+      clearError();
+      window.scrollTo({ top: 0, behavior: "auto" });
+      return true;
+    }
+
+    function navigate(id) {
+      if (id === state.screen) return;
+      state.history.push(state.screen);
+      showScreen(id);
+    }
+
+    function goHome() {
+      state.history = [];
+      state.subjectId = null;
+      state.handoutId = null;
+      state.attempt = null;
+      showScreen("screen-dashboard");
+    }
+
+    function goBack() {
+      const previous = state.history.pop();
+      if (!previous) {
+        goHome();
+        return;
+      }
+      showScreen(previous);
+    }
+
+    function currentSubject() {
+      return subjects[state.subjectId] || null;
+    }
+
+    function renderDashboard() {
+      const grid = byId("subject-grid");
+      grid.replaceChildren();
+      for (const subject of Object.values(subjects)) {
+        const card = make("button", "subject-card");
+        card.type = "button";
+        card.setAttribute("data-action", "select-subject");
+        card.setAttribute("data-subject", subject.id);
+        card.setAttribute("aria-label", "Open " + subject.name + " Prefinal reviewer");
+        const name = make("span", "subject-name", subject.name);
+        const code = make("span", "subject-code", subject.code + " · Prefinal");
+        const arrow = make("span", "card-arrow", "Open subject →");
+        card.append(name, code, arrow);
+        grid.appendChild(card);
+      }
+    }
+
+    function renderSubject() {
+      const subject = currentSubject();
+      if (!subject) throw new Error("Select a subject before opening its study modes.");
+      byId("subject-title").textContent = subject.name;
+      byId("subject-description").textContent = subject.description;
+    }
+
+    function renderHandoutMenu() {
+      const subject = currentSubject();
+      if (!subject) throw new Error("Select a subject before opening handouts.");
+      byId("handout-menu-title").textContent = subject.name + " handouts";
+      const grid = byId("handout-grid");
+      grid.replaceChildren();
+      for (const handout of subject.handouts) {
+        const card = make("button", "handout-card");
+        card.type = "button";
+        card.setAttribute("data-action", "open-handout");
+        card.setAttribute("data-handout", handout.id);
+        card.append(make("strong", "", handout.title), make("span", "small-label", handout.pages + " · Prefinal"));
+        grid.appendChild(card);
+      }
+    }
+
+    function addHandoutCard(container, entry, isTerm) {
+      const card = make("article", isTerm ? "term-card" : "term-card");
+      const heading = make("h3", "", entry.term || entry.title);
+      const label = make("strong", "source-label", entry.sourceLabel || (isTerm ? "Exact handout wording" : "Handout summary (not a direct quotation)"));
+      const source = make("p", "term-source");
+      source.appendChild(label);
+      source.appendChild(document.createTextNode("\n“" + entry.sourceText + "”"));
+      card.append(heading, source);
+      const meta = make("p", "term-meta", "Source: " + state.handoutTitle + " · " + entry.page);
+      card.appendChild(meta);
+      if (entry.elaboration) {
+        const elaboration = make("p", "elaboration");
+        elaboration.appendChild(make("strong", "", "Elaboration: "));
+        elaboration.appendChild(document.createTextNode(entry.elaboration));
+        card.appendChild(elaboration);
+      }
+      container.appendChild(card);
+    }
+
+    function renderHandout(handout) {
+      if (!handout) throw new Error("The selected handout was not found.");
+      state.handoutTitle = handout.title;
+      byId("handout-subject").textContent = currentSubject().name + " · Prefinal";
+      byId("handout-title").textContent = handout.title;
+      byId("handout-period").textContent = handout.pages + " · Source text is separated from the learner elaboration.";
+      byId("handout-count").textContent = handout.terms.length + " key terms";
+      const content = byId("handout-content");
+      content.replaceChildren();
+      const termsHeading = make("h2", "section-title", "Terms and definitions");
+      const termList = make("div", "terms-list");
+      for (const term of handout.terms) addHandoutCard(termList, term, true);
+      content.append(termsHeading, termList);
+      if (Array.isArray(handout.details) && handout.details.length) {
+        content.appendChild(make("h2", "section-title", "Procedures and other details"));
+        const detailList = make("div", "terms-list");
+        for (const detail of handout.details) addHandoutCard(detailList, detail, false);
+        content.appendChild(detailList);
+      }
+    }
+
+    function renderReviewerSetup() {
+      const subject = currentSubject();
+      if (!subject) throw new Error("Select a subject before opening the reviewer.");
+      byId("reviewer-subject").textContent = subject.name + " · Prefinal";
+    }
+
+    function shuffle(items) {
+      const result = items.slice();
+      for (let i = result.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    }
+
+    function buildAttempt(mode) {
+      const questions = exams[state.subjectId];
+      if (!Array.isArray(questions) || questions.length === 0) throw new Error("No reconstructed test is available for this subject.");
+      const order = mode === "shuffled" ? shuffle(questions) : questions.slice();
+      const choices = {};
+      for (const question of questions) {
+        const original = [0, 1, 2, 3];
+        choices[question.n] = mode === "shuffled" ? shuffle(original) : original;
+      }
+      state.mode = mode;
+      state.attempt = { questions: order, choices, answers: Object.create(null) };
+      renderTest();
+      navigate("screen-test");
+    }
+
+    function appendReferences(parent, refs) {
+      if (!Array.isArray(refs) || refs.length === 0) return;
+      const list = make("ul", "reference-list");
+      for (const id of refs) {
+        const reference = externalReferences[id];
+        if (!reference) continue;
+        const item = make("li", "");
+        const link = make("a", "", reference.title);
+        link.href = reference.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        item.appendChild(link);
+        list.appendChild(item);
+      }
+      if (list.childElementCount) parent.appendChild(list);
+    }
+
+    function getCounts() {
+      const attempt = state.attempt;
+      const questions = attempt ? attempt.questions : [];
+      const answered = attempt ? Object.keys(attempt.answers).length : 0;
+      const graded = questions.filter((question) => question.key !== null).length;
+      let correct = 0;
+      for (const question of questions) {
+        if (question.key === null) continue;
+        const selected = attempt.answers[question.n];
+        const answerIndex = LETTERS.indexOf(question.key);
+        if (selected !== undefined && selected === answerIndex) correct += 1;
+      }
+      return { total: questions.length, answered, graded, correct, ungraded: questions.length - graded };
+    }
+
+    function makeQuestionCard(question) {
+      const attempt = state.attempt;
+      const selected = attempt.answers[question.n];
+      const answered = selected !== undefined;
+      const card = make("article", "question-card");
+      card.id = "question-card-" + question.n;
+      const head = make("div", "question-head");
+      head.append(make("span", "question-number", question.n + "."), make("p", "question-text", question.q));
+      card.appendChild(head);
+      if (question.issue) {
+        const note = make("div", "question-note");
+        note.setAttribute("role", "note");
+        note.appendChild(document.createTextNode("Source note: " + question.issue));
+        appendReferences(note, question.refs);
+        card.appendChild(note);
+      }
+      const optionList = make("div", "option-list");
+      const optionOrder = attempt.choices[question.n];
+      for (let displayIndex = 0; displayIndex < optionOrder.length; displayIndex += 1) {
+        const originalIndex = optionOrder[displayIndex];
+        const option = make("button", "option-button");
+        option.type = "button";
+        option.setAttribute("data-action", "answer");
+        option.setAttribute("data-question", question.n);
+        option.setAttribute("data-choice-index", originalIndex);
+        option.setAttribute("aria-label", "Question " + question.n + ", choice " + LETTERS[displayIndex] + ": " + question.o[originalIndex]);
+        option.setAttribute("aria-describedby", "feedback-" + question.n);
+        const label = make("span", "option-label", LETTERS[displayIndex]);
+        const copy = make("span", "option-copy", question.o[originalIndex]);
+        option.append(label, copy);
+        if (answered) {
+          option.disabled = true;
+          if (question.key !== null) {
+            const correctIndex = LETTERS.indexOf(question.key);
+            if (originalIndex === correctIndex) option.classList.add("is-correct");
+            if (originalIndex === selected && selected !== correctIndex) option.classList.add("is-wrong");
+          } else if (originalIndex === selected) {
+            option.classList.add("is-selected");
+          }
+        }
+        optionList.appendChild(option);
+      }
+      card.appendChild(optionList);
+      const feedback = make("p", "feedback");
+      feedback.id = "feedback-" + question.n;
+      feedback.tabIndex = -1;
+      if (answered) {
+        if (question.key === null) {
+          feedback.classList.add("ungraded");
+          feedback.textContent = "Recorded for review · Not scored.";
+        } else {
+          const correctIndex = LETTERS.indexOf(question.key);
+          if (selected === correctIndex) {
+            feedback.classList.add("correct");
+            feedback.textContent = "Correct.";
+          } else {
+            feedback.classList.add("wrong");
+            const displayCorrectIndex = optionOrder.indexOf(correctIndex);
+            feedback.textContent = "Incorrect. Correct answer: " + LETTERS[displayCorrectIndex] + " — " + question.o[correctIndex] + ".";
+          }
+        }
+      }
+      card.appendChild(feedback);
+      return card;
+    }
+
+    function renderTest(focusQuestion) {
+      const subject = currentSubject();
+      const attempt = state.attempt;
+      if (!subject || !attempt) throw new Error("The test could not be rendered because no attempt is active.");
+      const counts = getCounts();
+      byId("test-subject").textContent = subject.name + " · Prefinal · Section A (35 items × 2 points)";
+      byId("test-title").textContent = subject.code + " Prefinal Test";
+      byId("test-mode-label").textContent = state.mode === "shuffled" ? "Shuffled practice · question and choice order randomized" : "Unshuffled · original question and choice order";
+      byId("score-live").textContent = "Scored: " + counts.correct + " / " + counts.graded;
+      byId("answered-live").textContent = "Answered: " + counts.answered + " / " + counts.total + " · Not scored: " + counts.ungraded;
+      const progress = byId("test-progress");
+      progress.setAttribute("aria-valuemax", String(counts.total));
+      progress.setAttribute("aria-valuenow", String(counts.answered));
+      byId("progress-fill").style.width = counts.total ? (counts.answered / counts.total * 100) + "%" : "0%";
+      const list = byId("question-list");
+      list.replaceChildren();
+      for (const question of attempt.questions) list.appendChild(makeQuestionCard(question));
+      const finalScore = byId("final-score");
+      finalScore.replaceChildren();
+      if (counts.answered === counts.total) {
+        const box = make("section", "final-score");
+        box.setAttribute("aria-live", "polite");
+        box.appendChild(make("h3", "", "Test complete"));
+        box.appendChild(make("p", "", "Final score: " + counts.correct + " / " + counts.graded + " scored items. Reviewed: " + counts.answered + " / " + counts.total + "."));
+        if (counts.ungraded) box.appendChild(make("p", "", counts.ungraded + " item(s) were excluded from scoring because of a source ambiguity or missing correct option."));
+        const retake = actionButton("Retake", "retake");
+        retake.classList.add("button-primary");
+        box.appendChild(retake);
+        finalScore.appendChild(box);
+      }
+      if (focusQuestion !== undefined) {
+        const focusTarget = document.getElementById("feedback-" + focusQuestion);
+        if (focusTarget) focusTarget.focus({ preventScroll: true });
+      }
+    }
+
+    function selectAnswer(button) {
+      const attempt = state.attempt;
+      if (!attempt) throw new Error("No active test is available.");
+      const questionNumber = Number(button.getAttribute("data-question"));
+      const optionIndex = Number(button.getAttribute("data-choice-index"));
+      const question = attempt.questions.find((item) => item.n === questionNumber);
+      if (!question || !Number.isInteger(optionIndex) || optionIndex < 0 || optionIndex > 3) throw new Error("That answer choice could not be matched to a question.");
+      if (Object.prototype.hasOwnProperty.call(attempt.answers, questionNumber)) return;
+      attempt.answers[questionNumber] = optionIndex;
+      renderTest(questionNumber);
+    }
+
+    function handleAction(actionElement) {
+      const action = actionElement.getAttribute("data-action");
+      if (!action) return;
+      switch (action) {
+        case "home": goHome(); return;
+        case "back": goBack(); return;
+        case "select-subject": {
+          const id = actionElement.getAttribute("data-subject");
+          if (!subjects[id]) throw new Error("The selected subject was not found.");
+          state.subjectId = id;
+          state.handoutId = null;
+          state.attempt = null;
+          renderSubject();
+          navigate("screen-subject");
+          return;
+        }
+        case "open-handouts": {
+          const subject = currentSubject();
+          if (!subject) throw new Error("Select a subject before opening handouts.");
+          if (subject.handouts.length > 1) {
+            renderHandoutMenu();
+            navigate("screen-handout-menu");
+          } else if (subject.handouts.length === 1) {
+            state.handoutId = subject.handouts[0].id;
+            renderHandout(subject.handouts[0]);
+            navigate("screen-handout");
+          } else {
+            showError("No handout content is available for this subject yet.");
+          }
+          return;
+        }
+        case "open-handout": {
+          const subject = currentSubject();
+          const id = actionElement.getAttribute("data-handout");
+          const handout = subject && subject.handouts.find((item) => item.id === id);
+          if (!handout) throw new Error("The selected handout was not found.");
+          state.handoutId = id;
+          renderHandout(handout);
+          navigate("screen-handout");
+          return;
+        }
+        case "open-reviewer":
+          renderReviewerSetup();
+          navigate("screen-reviewer-setup");
+          return;
+        case "start-test":
+          buildAttempt(actionElement.getAttribute("data-mode"));
+          return;
+        case "answer":
+          selectAnswer(actionElement);
+          return;
+        case "retake":
+          if (!state.subjectId || !state.mode) throw new Error("Choose a subject and test mode before retaking.");
+          buildAttempt(state.mode);
+          return;
+        default:
+          showError("That control is not available.");
+      }
+    }
+
+    try {
+      for (const id of ["nav-controls", "screen-dashboard", "screen-subject", "screen-handout-menu", "screen-handout", "screen-reviewer-setup", "screen-test", "subject-grid", "handout-grid", "handout-content", "question-list", "score-live", "answered-live", "test-progress", "progress-fill", "final-score"]) byId(id);
+      renderDashboard();
+      showScreen("screen-dashboard");
+      byId("app").addEventListener("click", (clickEvent) => {
+        if (!(clickEvent.target instanceof Element)) return;
+        const actionElement = clickEvent.target.closest("[data-action]");
+        if (!actionElement || !byId("app").contains(actionElement) && !byId("nav-controls").contains(actionElement) && !document.querySelector(".brand").contains(actionElement)) return;
+        try {
+          if (actionElement.tagName === "A") clickEvent.preventDefault();
+          switch (actionElement.getAttribute("data-action")) {
+            case "home": goHome(); return;
+            case "back": goBack(); return;
+            default: handleAction(actionElement);
+          }
+        } catch (error) {
+          showError("Something went wrong while opening this control: " + (error && error.message ? error.message : "unknown error"));
+        }
+      });
+      byId("nav-controls").addEventListener("click", (clickEvent) => {
+        if (!(clickEvent.target instanceof Element)) return;
+        const actionElement = clickEvent.target.closest("[data-action]");
+        if (!actionElement) return;
+        try { handleAction(actionElement); }
+        catch (error) { showError("Navigation failed: " + (error && error.message ? error.message : "unknown error")); }
+      });
+      document.querySelector(".brand").addEventListener("click", (clickEvent) => {
+        clickEvent.preventDefault();
+        goHome();
+      });
+    } catch (error) {
+      showError("The reviewer could not start: " + (error && error.message ? error.message : "unknown error"));
+    }
+  </script>
+</body>
+</html>
